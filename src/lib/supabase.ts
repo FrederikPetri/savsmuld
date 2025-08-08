@@ -34,6 +34,16 @@ export interface Database {
           rating: number
           image_url: string
           pdf_url: string
+          // Optional in DB; present in UI
+          estimated_time?: string
+          // Stored as JSONB in DB
+          materials_list?: Array<{
+            name: string
+            quantity: string
+            price: number
+            store: string
+            store_url: string
+          }>
           sketchup_url: string
           created_at: string
           updated_at: string
@@ -48,6 +58,14 @@ export interface Database {
           rating: number
           image_url: string
           pdf_url: string
+          estimated_time?: string
+          materials_list?: Array<{
+            name: string
+            quantity: string
+            price: number
+            store: string
+            store_url: string
+          }>
           sketchup_url: string
           created_at?: string
           updated_at?: string
@@ -62,6 +80,14 @@ export interface Database {
           rating?: number
           image_url?: string
           pdf_url?: string
+          estimated_time?: string
+          materials_list?: Array<{
+            name: string
+            quantity: string
+            price: number
+            store: string
+            store_url: string
+          }>
           sketchup_url?: string
           created_at?: string
           updated_at?: string

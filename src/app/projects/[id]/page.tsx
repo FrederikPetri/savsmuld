@@ -3,13 +3,14 @@
 import { useState, useEffect } from 'react'
 import { useParams } from 'next/navigation'
 import { ModelViewer } from '@/components/ModelViewer'
+import { fetchProjectById } from '@/lib/projects'
+import { isSupabaseConfigured } from '@/lib/supabase'
 import { 
   Star, 
   Wrench, 
   Download, 
   FileText, 
   ShoppingCart,
-  MapPin,
   Clock,
   Users,
   CheckCircle,
@@ -25,24 +26,25 @@ interface Material {
   store_url: string
 }
 
-interface Project {
+type Difficulty = 'beginner' | 'intermediate' | 'advanced'
+
+interface UiProject {
   id: string
   title: string
   description: string
   price: number
-  difficulty: 'beginner' | 'intermediate' | 'advanced'
+  difficulty: Difficulty
   tools_required: string[]
   materials_list: Material[]
   estimated_time: string
   rating: number
   reviews_count: number
   pdf_url: string
-  model_url: string
   sketchup_url: string
 }
 
-// Mock data - replace with actual Supabase query
-const mockProject: Project = {
+// Fallback mock when Supabase is not configured or project not found
+const mockProject: UiProject = {
   id: '1',
   title: 'Garden Shed',
   description: 'A beautiful 2x3m garden shed with detailed instructions and material list. Perfect for storing garden tools, bikes, and outdoor equipment. Features a sloped roof for water drainage and a sturdy wooden construction.',
@@ -61,25 +63,55 @@ const mockProject: Project = {
   rating: 4.8,
   reviews_count: 127,
   pdf_url: '/projects/garden-shed-instructions.pdf',
-  model_url: '/models/garden-shed.glb',
   sketchup_url: '/sketchup/garden-shed.skp'
 }
 
 export default function ProjectDetailPage() {
   const params = useParams()
-  const [project, setProject] = useState<Project | null>(null)
+  const [project, setProject] = useState<UiProject | null>(null)
   const [activeTab, setActiveTab] = useState<'overview' | 'materials' | 'tools' | 'reviews'>('overview')
   const [isPurchased, setIsPurchased] = useState(false)
   const [isProcessingPayment, setIsProcessingPayment] = useState(false)
 
   useEffect(() => {
-    // In a real app, fetch project data from Supabase
-    try {
-      setProject(mockProject)
-    } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : 'Failed to load project'
-      console.error('Error loading project:', errorMessage)
+    const load = async () => {
+      try {
+        if (!isSupabaseConfigured()) {
+          setProject(mockProject)
+          return
+        }
+        const id = Array.isArray(params.id) ? params.id[0] : (params as any).id
+        if (!id) {
+          setProject(mockProject)
+          return
+        }
+        const row = await fetchProjectById(String(id))
+        if (!row) {
+          setProject(mockProject)
+          return
+        }
+        const mapped: UiProject = {
+          id: String(row.id),
+          title: row.title,
+          description: row.description,
+          price: row.price,
+          difficulty: (row.difficulty as Difficulty) ?? 'beginner',
+          tools_required: Array.isArray(row.tools_required) ? row.tools_required : [],
+          materials_list: [],
+          estimated_time: 'N/A',
+          rating: row.rating ?? 0,
+          reviews_count: 0,
+          pdf_url: row.pdf_url ?? '#',
+          sketchup_url: row.sketchup_url ?? '#',
+        }
+        setProject(mapped)
+      } catch (error: unknown) {
+        const errorMessage = error instanceof Error ? error.message : 'Failed to load project'
+        console.error('Error loading project:', errorMessage)
+        setProject(mockProject)
+      }
     }
+    load()
   }, [params.id])
 
   if (!project) {

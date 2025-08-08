@@ -4,27 +4,27 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { 
   Search, 
-  Filter, 
   Star, 
-  Wrench, 
-  Download,
-  Eye,
-  ShoppingCart
+  Wrench
 } from 'lucide-react'
+import { fetchAllProjects } from '@/lib/projects'
+import { isSupabaseConfigured } from '@/lib/supabase'
 
-interface Project {
+type Difficulty = 'beginner' | 'intermediate' | 'advanced'
+
+interface UiProject {
   id: string
   title: string
   description: string
   price: number
-  difficulty: 'beginner' | 'intermediate' | 'advanced'
+  difficulty: Difficulty
   tools_required: string[]
   rating: number
   image_url?: string
 }
 
-// Mock data - replace with actual Supabase query
-const mockProjects: Project[] = [
+// Mock data used when Supabase is not configured
+const mockProjects: UiProject[] = [
   {
     id: '1',
     title: 'Garden Shed',
@@ -82,15 +82,46 @@ const mockProjects: Project[] = [
 ]
 
 export default function ProjectsPage() {
-  const [projects, setProjects] = useState<Project[]>(mockProjects)
+  const [projects, setProjects] = useState<UiProject[]>(mockProjects)
   const [searchTerm, setSearchTerm] = useState('')
   const [difficultyFilter, setDifficultyFilter] = useState<string>('all')
   const [priceRange, setPriceRange] = useState<string>('all')
+  const [isLoading, setIsLoading] = useState<boolean>(true)
+
+  useEffect(() => {
+    const load = async () => {
+      try {
+        if (!isSupabaseConfigured()) {
+          setProjects(mockProjects)
+          return
+        }
+
+        const rows = await fetchAllProjects()
+        const mapped: UiProject[] = rows.map(row => ({
+          id: String(row.id),
+          title: row.title,
+          description: row.description,
+          price: row.price,
+          difficulty: (row.difficulty as Difficulty) ?? 'beginner',
+          tools_required: Array.isArray(row.tools_required) ? row.tools_required : [],
+          rating: row.rating ?? 0,
+          image_url: row.image_url ?? undefined,
+        }))
+        setProjects(mapped.length ? mapped : mockProjects)
+      } catch (err) {
+        console.error('Failed to load projects:', err)
+        setProjects(mockProjects)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+    load()
+  }, [])
 
   const filteredProjects = projects.filter(project => {
     const matchesSearch = project.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          project.description.toLowerCase().includes(searchTerm.toLowerCase())
-    const matchesDifficulty = difficultyFilter === 'all' || project.difficulty === difficultyFilter
+    const matchesDifficulty = difficultyFilter === 'all' || project.difficulty === (difficultyFilter as Difficulty)
     const matchesPrice = priceRange === 'all' || 
                         (priceRange === 'low' && project.price <= 300) ||
                         (priceRange === 'medium' && project.price > 300 && project.price <= 600) ||
@@ -110,6 +141,9 @@ export default function ProjectsPage() {
 
   return (
     <div className="max-w-7xl mx-auto">
+      {isLoading && (
+        <div className="mb-6 text-gray-600">Loading projects...</div>
+      )}
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-4xl font-bold text-gray-900 mb-4">Building Projects</h1>

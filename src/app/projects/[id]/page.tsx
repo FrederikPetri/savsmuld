@@ -43,28 +43,7 @@ interface UiProject {
   sketchup_url: string
 }
 
-// Fallback mock when Supabase is not configured or project not found
-const mockProject: UiProject = {
-  id: '1',
-  title: 'Garden Shed',
-  description: 'A beautiful 2x3m garden shed with detailed instructions and material list. Perfect for storing garden tools, bikes, and outdoor equipment. Features a sloped roof for water drainage and a sturdy wooden construction.',
-  price: 299,
-  difficulty: 'beginner',
-  tools_required: ['Hammer', 'Circular Saw', 'Drill', 'Level', 'Measuring Tape', 'Clamps'],
-  materials_list: [
-    { name: 'Pressure-treated lumber 2x4', quantity: '20 pieces', price: 450, store: 'Silvan', store_url: 'https://silvan.dk' },
-    { name: 'Plywood sheets 1.2x2.4m', quantity: '4 sheets', price: 320, store: 'Bauhaus', store_url: 'https://bauhaus.dk' },
-    { name: 'Roofing felt', quantity: '6m²', price: 180, store: 'Silvan', store_url: 'https://silvan.dk' },
-    { name: 'Screws 4x60mm', quantity: '200 pieces', price: 85, store: 'Bauhaus', store_url: 'https://bauhaus.dk' },
-    { name: 'Door hinges', quantity: '2 pairs', price: 120, store: 'Silvan', store_url: 'https://silvan.dk' },
-    { name: 'Door handle', quantity: '1 piece', price: 95, store: 'Bauhaus', store_url: 'https://bauhaus.dk' },
-  ],
-  estimated_time: '2-3 days',
-  rating: 4.8,
-  reviews_count: 127,
-  pdf_url: '/projects/garden-shed-instructions.pdf',
-  sketchup_url: '/sketchup/garden-shed.skp'
-}
+// No mock fallback: if Supabase is not configured or project is missing, we'll show a minimal state
 
 export default function ProjectDetailPage() {
   const params = useParams()
@@ -77,17 +56,17 @@ export default function ProjectDetailPage() {
     const load = async () => {
       try {
         if (!isSupabaseConfigured()) {
-          setProject(mockProject)
+          setProject(null)
           return
         }
         const id = Array.isArray(params.id) ? params.id[0] : (params as any).id
         if (!id) {
-          setProject(mockProject)
+          setProject(null)
           return
         }
         const row = await fetchProjectById(String(id))
         if (!row) {
-          setProject(mockProject)
+          setProject(null)
           return
         }
         const mapped: UiProject = {
@@ -108,7 +87,7 @@ export default function ProjectDetailPage() {
       } catch (error: unknown) {
         const errorMessage = error instanceof Error ? error.message : 'Failed to load project'
         console.error('Error loading project:', errorMessage)
-        setProject(mockProject)
+        setProject(null)
       }
     }
     load()
@@ -119,7 +98,7 @@ export default function ProjectDetailPage() {
       <div className="flex items-center justify-center min-h-96">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading project...</p>
+          <p className="mt-4 text-gray-600">Indlæser projekt eller intet projekt fundet...</p>
         </div>
       </div>
     )
@@ -184,7 +163,7 @@ export default function ProjectDetailPage() {
         <div className="lg:col-span-2 space-y-8">
           {/* 3D Model Viewer */}
           <div>
-            <h2 className="text-2xl font-semibold mb-4">3D Model Preview</h2>
+            <h2 className="text-2xl font-semibold mb-4">3D‑model forhåndsvisning</h2>
             <ModelViewer />
           </div>
 
@@ -193,10 +172,10 @@ export default function ProjectDetailPage() {
             <div className="border-b border-gray-200">
               <nav className="flex space-x-8 px-6">
                 {[
-                  { id: 'overview', label: 'Overview', icon: FileText },
-                  { id: 'materials', label: 'Materials', icon: ShoppingCart },
-                  { id: 'tools', label: 'Tools', icon: Wrench },
-                  { id: 'reviews', label: 'Reviews', icon: Star }
+                  { id: 'overview', label: 'Overblik', icon: FileText },
+                  { id: 'materials', label: 'Materialer', icon: ShoppingCart },
+                  { id: 'tools', label: 'Værktøj', icon: Wrench },
+                  { id: 'reviews', label: 'Anmeldelser', icon: Star }
                 ].map((tab) => (
                   <button
                     key={tab.id}
@@ -218,7 +197,7 @@ export default function ProjectDetailPage() {
               {activeTab === 'overview' && (
                 <div className="space-y-6">
                   <div>
-                    <h3 className="text-lg font-semibold mb-3">Project Details</h3>
+                    <h3 className="text-lg font-semibold mb-3">Projekt detaljer</h3>
                     <p className="text-gray-600">{project.description}</p>
                   </div>
                   
@@ -226,22 +205,22 @@ export default function ProjectDetailPage() {
                     <div className="flex items-center space-x-3">
                       <Clock className="h-5 w-5 text-gray-400" />
                       <div>
-                        <div className="font-medium">Estimated Time</div>
+                        <div className="font-medium">Anslået tid</div>
                         <div className="text-sm text-gray-600">{project.estimated_time}</div>
                       </div>
                     </div>
                     <div className="flex items-center space-x-3">
                       <Wrench className="h-5 w-5 text-gray-400" />
                       <div>
-                        <div className="font-medium">Difficulty</div>
-                        <div className="text-sm text-gray-600 capitalize">{project.difficulty}</div>
+                        <div className="font-medium">Sværhedsgrad</div>
+                        <div className="text-sm text-gray-600 capitalize">{project.difficulty === 'beginner' ? 'begynder' : project.difficulty === 'intermediate' ? 'øvet' : 'avanceret'}</div>
                       </div>
                     </div>
                     <div className="flex items-center space-x-3">
                       <Users className="h-5 w-5 text-gray-400" />
                       <div>
-                        <div className="font-medium">Reviews</div>
-                        <div className="text-sm text-gray-600">{project.reviews_count} people</div>
+                        <div className="font-medium">Anmeldelser</div>
+                        <div className="text-sm text-gray-600">{project.reviews_count} personer</div>
                       </div>
                     </div>
                   </div>
@@ -251,10 +230,10 @@ export default function ProjectDetailPage() {
               {activeTab === 'materials' && (
                 <div>
                   <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-lg font-semibold">Materials List</h3>
+                    <h3 className="text-lg font-semibold">Materialeliste</h3>
                     <div className="text-right">
                       <div className="text-2xl font-bold text-gray-900">{totalMaterialsCost} kr</div>
-                      <div className="text-sm text-gray-600">Total estimated cost</div>
+                      <div className="text-sm text-gray-600">Samlet anslået pris</div>
                     </div>
                   </div>
                   
@@ -287,7 +266,7 @@ export default function ProjectDetailPage() {
 
               {activeTab === 'tools' && (
                 <div>
-                  <h3 className="text-lg font-semibold mb-4">Required Tools</h3>
+                  <h3 className="text-lg font-semibold mb-4">Påkrævet værktøj</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {project.tools_required.map((tool, index) => (
                       <div key={index} className="flex items-center space-x-3 p-3 border border-gray-200 rounded-lg">
@@ -301,8 +280,8 @@ export default function ProjectDetailPage() {
 
               {activeTab === 'reviews' && (
                 <div>
-                  <h3 className="text-lg font-semibold mb-4">Customer Reviews</h3>
-                  <p className="text-gray-600">Reviews will be displayed here.</p>
+                  <h3 className="text-lg font-semibold mb-4">Kundeanmeldelser</h3>
+                  <p className="text-gray-600">Anmeldelser vises her.</p>
                 </div>
               )}
             </div>
@@ -313,14 +292,14 @@ export default function ProjectDetailPage() {
         <div className="space-y-6">
           {/* Purchase Card */}
           <div className="bg-white rounded-lg shadow-md p-6">
-            <h3 className="text-xl font-semibold mb-4">Get This Project</h3>
+            <h3 className="text-xl font-semibold mb-4">Køb dette projekt</h3>
             
             {isPurchased ? (
               <div className="space-y-4">
                 <div className="bg-green-50 border border-green-200 rounded-lg p-4">
                   <div className="flex items-center space-x-2 text-green-700">
                     <CheckCircle className="h-5 w-5" />
-                    <span className="font-medium">Project Purchased!</span>
+                    <span className="font-medium">Projekt købt!</span>
                   </div>
                 </div>
                 
@@ -330,7 +309,7 @@ export default function ProjectDetailPage() {
                     className="w-full flex items-center justify-center space-x-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
                   >
                     <FileText className="h-4 w-4" />
-                    <span>Download PDF Instructions</span>
+                    <span>Download PDF‑vejledning</span>
                   </a>
                   
                   <a
@@ -338,7 +317,7 @@ export default function ProjectDetailPage() {
                     className="w-full flex items-center justify-center space-x-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors"
                   >
                     <Download className="h-4 w-4" />
-                    <span>Download SketchUp File</span>
+                    <span>Download SketchUp‑fil</span>
                   </a>
                 </div>
               </div>
@@ -346,7 +325,7 @@ export default function ProjectDetailPage() {
               <div className="space-y-4">
                 <div className="text-center">
                   <div className="text-3xl font-bold text-gray-900 mb-2">{project.price} kr</div>
-                  <p className="text-gray-600">One-time purchase</p>
+                  <p className="text-gray-600">Engangskøb</p>
                 </div>
                 
                 <button 
@@ -357,12 +336,12 @@ export default function ProjectDetailPage() {
                   {isProcessingPayment ? (
                     <>
                       <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                      <span>Processing Payment...</span>
+                      <span>Behandler betaling...</span>
                     </>
                   ) : (
                     <>
                       <CreditCard className="h-5 w-5" />
-                      <span>Purchase Project</span>
+                      <span>Køb projekt</span>
                     </>
                   )}
                 </button>
@@ -370,25 +349,25 @@ export default function ProjectDetailPage() {
                 <div className="text-sm text-gray-600 space-y-2">
                   <div className="flex items-center space-x-2">
                     <CheckCircle className="h-4 w-4 text-green-500" />
-                    <span>Detailed PDF instructions</span>
+                    <span>Detaljeret PDF‑vejledning</span>
                   </div>
                   <div className="flex items-center space-x-2">
                     <CheckCircle className="h-4 w-4 text-green-500" />
-                    <span>3D model viewer</span>
+                    <span>3D‑modelviser</span>
                   </div>
                   <div className="flex items-center space-x-2">
                     <CheckCircle className="h-4 w-4 text-green-500" />
-                    <span>SketchUp file download</span>
+                    <span>SketchUp‑fil download</span>
                   </div>
                   <div className="flex items-center space-x-2">
                     <CheckCircle className="h-4 w-4 text-green-500" />
-                    <span>Danish store material list</span>
+                    <span>Materialeliste fra danske butikker</span>
                   </div>
                 </div>
 
                 <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
                   <p className="text-blue-700 text-xs">
-                    💳 <strong>Demo Mode:</strong> This is a simulated payment. No real charges will be made.
+                    💳 <strong>Demo‑tilstand:</strong> Dette er en simuleret betaling. Ingen rigtige køb foretages.
                   </p>
                 </div>
               </div>
@@ -397,22 +376,22 @@ export default function ProjectDetailPage() {
 
           {/* Project Stats */}
           <div className="bg-white rounded-lg shadow-md p-6">
-            <h3 className="text-lg font-semibold mb-4">Project Statistics</h3>
+            <h3 className="text-lg font-semibold mb-4">Projektstatistik</h3>
             <div className="space-y-3">
               <div className="flex justify-between">
-                <span className="text-gray-600">Difficulty</span>
+                <span className="text-gray-600">Sværhedsgrad</span>
                 <span className="font-medium capitalize">{project.difficulty}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-gray-600">Estimated Time</span>
+                <span className="text-gray-600">Anslået tid</span>
                 <span className="font-medium">{project.estimated_time}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-gray-600">Materials Cost</span>
+                <span className="text-gray-600">Materialepris (anslået)</span>
                 <span className="font-medium">{totalMaterialsCost} kr</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-gray-600">Tools Required</span>
+                <span className="text-gray-600">Antal værktøjer</span>
                 <span className="font-medium">{project.tools_required.length}</span>
               </div>
             </div>

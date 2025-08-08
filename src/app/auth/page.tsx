@@ -27,7 +27,7 @@ export default function AuthPage() {
     e.preventDefault()
     
     if (!isConfigured) {
-      setError('Authentication is not configured. Please set up Supabase first.')
+      setError('Login er ikke konfigureret. Opsæt venligst Supabase først.')
       return
     }
 
@@ -46,7 +46,7 @@ export default function AuthPage() {
           }
         })
         if (error) throw error
-        alert('Check your email for the confirmation link!')
+        alert('Tjek din e‑mail for bekræftelseslinket!')
       } else {
         const { error } = await supabase.auth.signInWithPassword({
           email,
@@ -56,7 +56,7 @@ export default function AuthPage() {
         router.push('/profile')
       }
     } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : 'An error occurred'
+      const errorMessage = error instanceof Error ? error.message : 'Der opstod en fejl'
       setError(errorMessage)
     } finally {
       setLoading(false)
@@ -68,27 +68,27 @@ export default function AuthPage() {
       <div className="max-w-md w-full space-y-8">
         <div>
           <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            {isSignUp ? 'Create your account' : 'Sign in to your account'}
+            {isSignUp ? 'Opret din konto' : 'Log ind på din konto'}
           </h2>
           <p className="mt-2 text-center text-sm text-gray-600">
-            {isSignUp ? 'Already have an account?' : "Don't have an account?"}{' '}
+            {isSignUp ? 'Har du allerede en konto?' : 'Har du ikke en konto?'}{' '}
             <button
               onClick={() => setIsSignUp(!isSignUp)}
               className="font-medium text-blue-600 hover:text-blue-500"
             >
-              {isSignUp ? 'Sign in' : 'Sign up'}
+              {isSignUp ? 'Log ind' : 'Opret konto'}
             </button>
           </p>
         </div>
 
         {!isConfigured && (
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
             <div className="flex items-center space-x-2 text-blue-700">
               <Info className="h-5 w-5" />
-              <span className="font-medium">Demo Mode</span>
+                <span className="font-medium">Demo‑tilstand</span>
             </div>
             <p className="text-blue-600 text-sm mt-2">
-              Authentication is not configured. This is a demo with mock data.
+                Login er ikke konfigureret. Dette er en demo uden rigtige data.
             </p>
           </div>
         )}
@@ -103,7 +103,7 @@ export default function AuthPage() {
                   type="text"
                   required={isSignUp}
                   className="appearance-none rounded-none relative block w-full px-10 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
-                  placeholder="Full name"
+                  placeholder="Fulde navn"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                 />
@@ -117,7 +117,7 @@ export default function AuthPage() {
                 autoComplete="email"
                 required
                 className="appearance-none rounded-none relative block w-full px-10 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
-                placeholder="Email address"
+                placeholder="E‑mailadresse"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
               />
@@ -130,7 +130,7 @@ export default function AuthPage() {
                 autoComplete="current-password"
                 required
                 className="appearance-none rounded-none relative block w-full px-10 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
-                placeholder="Password"
+                placeholder="Adgangskode"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
               />
@@ -161,14 +161,14 @@ export default function AuthPage() {
               disabled={loading || !isConfigured}
               className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {loading ? 'Loading...' : (isSignUp ? 'Sign up' : 'Sign in')}
+              {loading ? 'Indlæser...' : (isSignUp ? 'Opret konto' : 'Log ind')}
             </button>
           </div>
 
           <div className="flex items-center justify-between">
             <div className="text-sm">
               <a href="#" className="font-medium text-blue-600 hover:text-blue-500">
-                Forgot your password?
+                Glemt adgangskode?
               </a>
             </div>
           </div>

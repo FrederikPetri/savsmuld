@@ -30,34 +30,34 @@ export function Navbar() {
           <div className="flex items-center">
             <Link href="/" className="flex items-center space-x-2">
               <Hammer className="h-8 w-8 text-blue-600" />
-              <span className="text-xl font-bold text-gray-900">Building Projects</span>
+              <span className="text-xl font-bold text-gray-900">Byggeprojekter</span>
             </Link>
           </div>
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-8">
             <Link href="/projects" className="text-gray-700 hover:text-blue-600 transition-colors">
-              Projects
+              Projekter
             </Link>
             <Link href="/about" className="text-gray-700 hover:text-blue-600 transition-colors">
-              About
+              Om
             </Link>
             <Link href="/contact" className="text-gray-700 hover:text-blue-600 transition-colors">
-              Contact
+              Kontakt
             </Link>
             
             {user ? (
               <div className="flex items-center space-x-4">
                 <Link href="/profile" className="flex items-center space-x-2 text-gray-700 hover:text-blue-600 transition-colors">
                   <UserIcon className="h-5 w-5" />
-                  <span>Profile</span>
+                  <span>Profil</span>
                 </Link>
                 <button
                   onClick={handleSignOut}
                   className="flex items-center space-x-2 text-gray-700 hover:text-red-600 transition-colors"
                 >
                   <LogOut className="h-5 w-5" />
-                  <span>Sign Out</span>
+                  <span>Log ud</span>
                 </button>
               </div>
             ) : (
@@ -65,7 +65,7 @@ export function Navbar() {
                 href="/auth"
                 className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors"
               >
-                Sign In
+                Log ind
               </Link>
             )}
           </div>
@@ -94,21 +94,21 @@ export function Navbar() {
                 className="block px-3 py-2 text-gray-700 hover:text-blue-600 transition-colors"
                 onClick={() => setIsMenuOpen(false)}
               >
-                Projects
+                Projekter
               </Link>
               <Link 
                 href="/about" 
                 className="block px-3 py-2 text-gray-700 hover:text-blue-600 transition-colors"
                 onClick={() => setIsMenuOpen(false)}
               >
-                About
+                Om
               </Link>
               <Link 
                 href="/contact" 
                 className="block px-3 py-2 text-gray-700 hover:text-blue-600 transition-colors"
                 onClick={() => setIsMenuOpen(false)}
               >
-                Contact
+                Kontakt
               </Link>
               
               {user ? (
@@ -118,13 +118,13 @@ export function Navbar() {
                     className="block px-3 py-2 text-gray-700 hover:text-blue-600 transition-colors"
                     onClick={() => setIsMenuOpen(false)}
                   >
-                    Profile
+                    Profil
                   </Link>
                   <button
                     onClick={handleSignOut}
                     className="block w-full text-left px-3 py-2 text-gray-700 hover:text-red-600 transition-colors"
                   >
-                    Sign Out
+                    Log ud
                   </button>
                 </>
               ) : (
@@ -133,7 +133,7 @@ export function Navbar() {
                   className="block px-3 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
                   onClick={() => setIsMenuOpen(false)}
                 >
-                  Sign In
+                  Log ind
                 </Link>
               )}
             </div>

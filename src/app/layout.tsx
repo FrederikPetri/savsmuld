@@ -7,8 +7,8 @@ import { AuthProvider } from "@/components/AuthProvider";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Building Projects - DIY Construction Plans",
-  description: "Premium building projects with detailed instructions, 3D models, and material lists for Danish stores",
+  title: "Byggeprojekter - Tegninger og vejledninger",
+  description: "Premium byggeprojekter med detaljerede vejledninger, 3D‑modeller og materialelister til danske byggemarkeder",
 };
 
 export default function RootLayout({
@@ -17,7 +17,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="da">
       <body className={inter.className}>
         <AuthProvider>
           <div className="min-h-screen bg-gray-50">
